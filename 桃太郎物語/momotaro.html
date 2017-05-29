@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>桃太郎物語</title>
+
+<link href="https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css" rel="stylesheet" />
+<style type="text/css">
+#canvas{
+	width: 800px;
+	height: 600px;
+	border: 1px solid gray;
+}
+#serif{
+	position: relative;
+	top: 350px;
+	left: 100px;
+	width: 600px;
+	height: 200px;
+	border: 1px solid blue;
+	background-color: rgba(255, 255, 255, 0.75);
+	padding: 10px;
+	user-select: none;
+	font-family: "Rounded Mplus 1c";
+	font-size: 18pt;
+}
+#Next{
+	position: relative;
+	top: 350px;
+	left: 100px;
+}
+#A1{
+	position: relative;
+	top: 350px;
+	left: 100px;
+}
+#A2{
+	position: relative;
+	top: 350px;
+	left: 100px;
+}
+#End{
+	position: relative;
+	top: 350px;
+	left: 100px;
+}
+
+</style>
+
+<audio id="SE" preload="auto">
+	<source src="se/cursor_move.wav" type="audio/wav">
+</audio>
+<audio id="Music" preload="auto" loop>
+   <source src="MP3/momotarou.mp3" type="audio/mp3">
+</audio>
+<audio id="MusicE" preload="auto">
+   <source src="MP3/gameover.mp3" type="audio/mp3">
+</audio>
+</head>
+<body>
+<div id="canvas">
+	  <button id="Next" onclick="ring();">次へ</button>
+			  <button id="A1" onclick="ring();">A1</button><button id="A2" onclick="ring();">A2</button>
+			<button id="End" onclick="ring();">最初から</button>
+	<div id="serif"></div>
+</div>
+
+<script src="js/jquery.min.js"></script>
+<script>
+var I=0;
+var SCENARIO = [
+	  {com:"BG", val:"url(image/bg/BG004.jpg)"}
+	, {com:"S",  val:"次へのボタンを押してスタート"}
+	, {com:"BG", val:"url(image/bg/BG001.jpg)"}
+	, {com:"S",  val:"むかし、むかし、ある所におじいさんとおばあさんが住んでいました。 "}
+	,{com:"BG", val:"url(image/bg/yama.png)"}
+	, {com:"S",  val:"おじいさんは山へしば刈りに、"}
+	,{com:"BG", val:"url(image/bg/river.png)"}
+	, {com:"S",  val:"おばあさんは川へ洗濯に行きました。"}
+	,{com:"S", val:"おばあさんが川で洗濯をしていると大きな桃が流れてきました。"}
+	,{com:"Q",val:"どうしますか？ A1:桃を持って帰る A2:桃を持って帰らない"}//8
+	, {com:"BG", val:"url(image/bg/BG002.jpg)"}
+	, {com:"S",  val:"「なんと大きな桃じゃろう！家に持って帰ろう。」 とおばあさんは背中に担いで家に帰り、その桃を切ろうとしました。"}
+	, {com:"BG", val:"url(image/bg/momotaro4.png)"}
+	, {com:"S",  val:"そのとき、なんと桃から大きな赤ん坊が出てきたのです。 "}
+	, {com:"S",  val:"「おっとたまげた。」 "}
+	, {com:"S",  val:"二人は驚いたけれども、とても喜び、 "}
+	, {com:"S",  val:"「何という名前にしましょうか。」 "}
+	, {com:"S",  val:"「桃から生まれたから、桃太郎というのはどうだろう。」 "}
+	, {com:"S",  val:"「それがいい。」"}
+	, {com:"S",  val:"桃太郎はあっと言う間に大きくなり、立派な優しい男の子になりました。 ある日、桃太郎は二人に言いました。"}
+	,{com:"Q",val:"何て言いますか？ A1:「鬼ケ島に悪い鬼が住んでいると聞きました。」A2:「今日は私が川へ行ってきます。おかあさんは休んでください。」"}//19
+	,{com:"BG", val:"url(image/bg/BG003.jpg)"}
+	,{com:"S",val:"「時々村に来て悪いことをするのでみんな困っている。」 とおじいさんが答えると、「それでは私が行って退治しましょう。おかあさん、きび団子を作って下さい。」"}
+	,{com:"S",val:"おばあさんはとてもおいしい日本一のきび団子を作り、桃太郎はそれを腰の袋に入れるとさっそく鬼ケ島に向けて旅立ちました。"}
+	,{com:"BG", val:"url(image/bg/yama.png)"}
+	,{com:"S",val:"旅の途中、桃太郎は犬に会い、 "}
+	,{com:"S",val:"「桃太郎さん、袋の中に何が入っているんだい。」「日本一のきび団子だよ。」「僕に一つくれればお伴します。」 "}
+	,{com:"Q",val:"どうしますか？ A1:きび団子をあげる A2:きび団子をあげない"}//25
+	, {com:"S",  val:"犬は桃太郎から一つ団子をもらい家来になりました。"}
+	, {com:"S",  val:"旅を続けていると、猿がやってきて、"}
+	, {com:"S",  val:"「桃太郎さん、袋の中に何が入っているんだい。」「日本一のきび団子だよ。」「僕に一つくれればお伴します。」 "}
+	,{com:"Q",val:"どうしますか？ A1:きび団子をあげる A2:きび団子をあげない"}//29
+	, {com:"S",  val:"猿は桃太郎から一つ団子をもらい家来になりました。"}
+	, {com:"S",  val:"旅を続けていると、サギが飛んできて、"}//31
+	, {com:"S",  val:"「桃太郎さん、袋の中に何が入っているんだい。」「日本一のきび団子だよ。」「僕に一つくれればお伴します。」"}
+	,{com:"Q",val:"どうしますか？ A1:きび団子をあげる A2:きび団子をあげない"}//33
+	, {com:"S",  val:"「きび団子、ありがとよ！」きび団子を食べたサギは、そう言うとどこかへ飛び去ってしまいました。"}
+	, {com:"S",  val:"旅を続けていると、キジが飛んできて、"}
+	, {com:"S",  val:"「桃太郎さん、袋の中に何が入っているんだい。」「日本一のきび団子だよ。」「僕に一つくれればお伴します。」"}
+	,{com:"Q",val:"どうしますか？ A1:きび団子をあげる A2:きび団子をあげない"}//37
+	, {com:"S",  val:"キジは桃太郎から一つ団子をもらい家来になりました。"}
+	,{com:"BG", val:"url(image/bg/demon_island.png)"}
+	, {com:"S",  val:"その後、船に乗って旅をしていると鬼ケ島が見えてきました。"}//39
+	,{com:"Q2",val:""}//40
+	, {com:"S",  val:"「あれが鬼ケ島に違いない。」犬が吠えました。"}
+	, {com:"S",  val:"鬼ケ島に着くと、お城の門の前に、大きな鬼が立っており、桃太郎は大きな石をつかむと鬼に向かって投げました。"}
+	, {com:"S",  val:"猿は門に登り鍵を開けました。キジは鬼の目をつつきました。"}
+	, {com:"S",  val:"「こりあ参った。助けてくれ～」そういうと、鬼はお城の中に逃げていきました。"}
+	, {com:"S",  val:"するとお城から沢山の鬼が出てきて、ついに大きな鬼があらわれました。"}
+	, {com:"S",  val:"「生意気な小僧。俺様が懲らしめてやる。」大きな金棒を振り回しながら言いました。 "}
+	, {com:"S",  val:"「あなたがかしらですか。」と言うと桃太郎はすばやく金棒の上に飛び乗り、「悪い鬼、村人に悪いことをしたからには許せない。私のこぶしを受けてみろ。」"}
+	, {com:"S",  val:"「アイタタ、ごめん。ごめん。許してくれ。降参だ。」"}
+	, {com:"S",  val:"「本当に約束するか。」"}
+	, {com:"S",  val:"「約束する。嘘はつきません。宝物をやります。」"}
+	, {com:"S",  val:"桃太郎はお城の金や銀や織物や、荷車一杯の宝物を手に入れました。"}
+	,{com:"Q3",val:""}//52
+	, {com:"BG", val:"url(image/bg/BG001.jpg)"}
+	, {com:"S",  val:"こうして、桃太郎はおじいさんとおばあさんの待つ家に帰り、みんなで幸せにくらしました。"}
+	, {com:"End",  val:"めでたしめでたし"}
+	, {com:"E",  val:""}
+	,{com:"S", val:"「なんと大きな桃じゃろう！でもあれを持ち帰るのはちときついのう」とおばあさんは桃を見送りました。"}//55
+	, {com:"BGE", val:"url(image/bg/GameOver.png)"}
+	,{com:"End", val:"その桃は誰にも拾われることはなく、川から海へとたどり着き、人知れず海のそこへ沈んでいきました。おしまい"}
+	, {com:"E",  val:""}
+	,{com:"BG", val:"url(image/bg/river.png)"}
+	,{com:"S", val:"桃太郎は川へ洗濯に行きました。桃太郎が川で洗濯をしていると・・・"}//58
+	, {com:"BGE", val:"url(image/bg/GameOver.png)"}
+	,{com:"S", val:"突然、鉄砲水に飲まれてしまいました。「何故こんなことに・・・だがおかあさんが流されなくてよかった・・・」"}
+	,{com:"End", val:"それ以来、桃太郎の姿を見た者は誰もいなかったそうです。おしまい"}
+	, {com:"E",  val:""}
+	,{com:"S", val:"「そうですか、残念です」犬は、とぼとぼと去っていきました。"}//62
+	, {com:"D",  val:""}
+	,{com:"S", val:"「そうですか、残念です」猿は、とぼとぼと去っていきました。"}//64
+	, {com:"Ei",  val:""}
+	,{com:"S", val:"サギは舌打ちをして去っていきました。"}//66
+	, {com:"SG",  val:""}
+	,{com:"S", val:"「そうですか、残念です」キジは、とぼとぼと去っていきました。"}//68
+	, {com:"K",  val:""}
+	,{com:"S", val:"鬼ケ島に着くと、お城の門の前に、大きな鬼が立っており、桃太郎は大きな石をつかむと鬼に向かって投げました。"}//77
+	,{com:"S", val:"「侵入者だ。囲め囲め！」鬼がそういうと、桃太郎は瞬く間にたくさんの鬼に囲まれてしまいました。"}
+	, {com:"BGE", val:"url(image/bg/GameOver.png)"}
+	,{com:"End", val:"桃太郎は必死に抵抗しましたが鬼達の猛攻によってついに力尽きてしまいました。おしまい"}
+	, {com:"E",  val:""}
+	,{com:"S", val:"いよいよ鬼ケ島だ、さぁ鬼を退治するぞと桃太郎達が意気込んだその時"}//82
+	,{com:"S", val:"「きび団子をよこせ！」突然サギの大群が桃太郎達に襲い掛かってきました。"}
+	, {com:"BGE", val:"url(image/bg/GameOver.png)"}
+	,{com:"End", val:"サギの大群によって桃太郎達が乗っていた船は沈み海の藻屑と消えてしまいました。おしまい"}
+	, {com:"E",  val:""}
+	, {com:"BG", val:"url(image/bg/BG001.jpg)"}//88
+	,{com:"S", val:"桃太郎達は鬼ヶ島を出て、おじいさんとおばあさんの待つ家に向かいました。"}
+	, {com:"BGE", val:"url(image/bg/GameOver.png)"}
+	,{com:"S", val:"しかし、きび団子が底をついてしまい、桃太郎は空腹で倒れてしまいました。"}
+	,{com:"End", val:"「あと少しだったのに・・・」桃太郎は家来に宝物を家に届けるように言うとそのまま力尽きてしまいました。おしまい"}
+	, {com:"E",  val:""}
+];
+
+var Novel = {
+	  cursor: 0
+	, max: 0
+	, nakama: 0
+	, dango: 4
+	, init: function(){
+		document.getElementById("A1").style.visibility = "hidden";
+		document.getElementById("A2").style.visibility = "hidden";
+		document.getElementById("End").style.visibility = "hidden";
+		this.max = SCENARIO.length;
+		this.play();
+	}
+	,anser1A: function(){
+		this.cursor=60;
+		document.getElementById("Next").style.visibility = "visible";
+		document.getElementById("A1").style.visibility = "hidden";
+		document.getElementById("A2").style.visibility = "hidden";
+		this.play();
+	}
+	,anser2A: function(){
+		this.cursor=64;
+		document.getElementById("Next").style.visibility = "visible";
+		document.getElementById("A1").style.visibility = "hidden";
+		document.getElementById("A2").style.visibility = "hidden";
+		this.play();
+	}
+	,anser3A: function(){
+		this.cursor=70;
+		document.getElementById("Next").style.visibility = "visible";
+		document.getElementById("A1").style.visibility = "hidden";
+		document.getElementById("A2").style.visibility = "hidden";
+		this.play();
+	}
+	,anser4A: function(){
+		this.cursor=72;
+		document.getElementById("Next").style.visibility = "visible";
+		document.getElementById("A1").style.visibility = "hidden";
+		document.getElementById("A2").style.visibility = "hidden";
+		this.play();
+	}
+	,anser5A: function(){
+		this.cursor=74;
+		document.getElementById("Next").style.visibility = "visible";
+		document.getElementById("A1").style.visibility = "hidden";
+		document.getElementById("A2").style.visibility = "hidden";
+		this.play();
+	}
+	,anser6A: function(){
+		this.cursor=76;
+		document.getElementById("Next").style.visibility = "visible";
+		document.getElementById("A1").style.visibility = "hidden";
+		document.getElementById("A2").style.visibility = "hidden";
+		this.play();
+	}
+	, play: function(){
+		if( this.cursor >= this.max){
+			return(false);
+		}
+
+		switch(SCENARIO[this.cursor].com){
+			// セリフ再生
+			case "S":
+				$("#serif").html(SCENARIO[this.cursor].val);
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				this.cursor++;
+				break;
+
+			case "End":
+				$("#serif").html(SCENARIO[this.cursor].val);
+				document.getElementById("End").style.visibility = "visible";
+				document.getElementById("Next").style.visibility = "hidden";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				this.cursor++;
+				break;
+
+			// 背景変更
+			case "BG":
+				$("#canvas").css("background-image", SCENARIO[this.cursor].val);
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				this.cursor++;
+				Novel.play();
+				document.getElementById("Music").play();
+				document.getElementById("MusicE").pause();
+				document.getElementById("MusicE").currentTime=0;
+				break;
+
+			case "BGE":
+					$("#canvas").css("background-image", SCENARIO[this.cursor].val);
+					document.getElementById("Next").style.visibility = "visible";
+					document.getElementById("A1").style.visibility = "hidden";
+					document.getElementById("A2").style.visibility = "hidden";
+					this.cursor++;
+					Novel.play();
+					document.getElementById("Music").pause();
+					document.getElementById("Music").currentTime=0;
+					document.getElementById("MusicE").play();
+					break;
+
+				//分岐1
+				case "Q":
+				$("#serif").html(SCENARIO[this.cursor].val);
+				document.getElementById("Next").style.visibility = "hidden";
+				document.getElementById("A1").style.visibility = "visible";
+				document.getElementById("A2").style.visibility = "visible";
+				this.cursor++;
+				break;
+
+				case "Q2":
+				if(this.nakama==0)
+				this.cursor=78;
+				else if(this.nakama==1)
+				this.cursor=83;
+				else if(this.nakama==2)
+				this.cursor=83;
+				else if(this.nakama==3)
+				this.cursor++;
+				else
+				this.cursor++;
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				document.getElementById("End").style.visibility = "hidden";
+				Novel.play();
+				break;
+
+				case "Q3":
+				if(this.dango!=0)
+				this.cursor++;
+				else
+				this.cursor=88;
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				document.getElementById("End").style.visibility = "hidden";
+				Novel.play();
+				break;
+
+				//犬仲間にならない
+				case "D":
+				this.cursor=29;
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				document.getElementById("End").style.visibility = "hidden";
+				Novel.play();
+				break;
+
+				//猿仲間にならない
+				case "Ei":
+				this.cursor=33;
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				document.getElementById("End").style.visibility = "hidden";
+				Novel.play();
+				break;
+
+				//サギ
+				case "SG":
+				this.cursor=37;
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				document.getElementById("End").style.visibility = "hidden";
+				Novel.play();
+				break;
+
+				case "K":
+				this.cursor=41;
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				document.getElementById("End").style.visibility = "hidden";
+				Novel.play();
+				break;
+
+				//最初から
+				case "E":
+				this.cursor=0;
+				this.nakama=0;
+				this.dango=4;
+				document.getElementById("Next").style.visibility = "visible";
+				document.getElementById("A1").style.visibility = "hidden";
+				document.getElementById("A2").style.visibility = "hidden";
+				document.getElementById("End").style.visibility = "hidden";
+				Novel.play();
+				break;
+
+			default:
+				break;
+		}
+	}
+};
+
+function ring() {
+   document.getElementById("SE").play();
+}
+
+$(document).ready(function(){
+	Novel.init();
+	//Select.init();
+
+	$("#Next")
+.on("click", function(){
+	//document.getElementById("Next").disabled = true;//スイッチ無効
+	//document.getElementById("Next").style.visibility = "hidden";//スイッチ非表示
+	Novel.play();
+		});
+
+//分岐
+	$("#A1")
+.on("click", function(){
+	switch(Novel.cursor){
+	case 28:
+	Novel.dango--;
+	Novel.nakama++;
+	Novel.play();
+	break;
+	case 32:
+	Novel.dango--;
+	Novel.nakama++;
+	Novel.play();
+	break;
+	case 36:
+	Novel.dango--;
+	Novel.play();
+	break;
+	case 40:
+	Novel.dango--;
+	Novel.nakama++;
+	Novel.play();
+	break;
+	default:
+	Novel.play();
+	break;
+}
+		});
+
+	$("#A2")
+.on("click", function(){
+	switch(Novel.cursor){//+1
+	case 10:
+	Novel.anser1A();
+	break;
+	case 21:
+	Novel.anser2A();
+	break;
+	case 28:
+	Novel.anser3A();
+	break;
+	case 32:
+	Novel.anser4A();
+	break;
+	case 36:
+	Novel.anser5A();
+	break;
+	case 40:
+	Novel.anser6A();
+	break;
+}
+		});
+
+	$("#End")
+.on("click", function(){
+	Novel.play();
+		});
+});
+</script>
+</body>
+</html>
